@@ -58,8 +58,7 @@ GoogleService-Info.plist
 
 repomix-output.xml
 .serena/cache
-plans/**/*
-!plans/templates/*
+# plans folder is now tracked
 screenshots/*
 docs/screenshots/*
 docs/journals/*
