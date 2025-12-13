@@ -190,6 +190,10 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 
 ## 📖 Documentation
 
+- **Project Overview & PDR:** `docs/project-overview-pdr.md` (coming soon)
+- **Codebase Summary:** `docs/codebase-summary.md`
+- **System Architecture:** `docs/system-architecture.md`
+- **Code Standards:** `docs/code-standards.md`
 - **Design Guidelines:** `docs/design-guidelines.md`
 - **Wireframes:** `docs/wireframes/`
 - **Implementation Plan:** `plans/2025-12-13-ciphertalk-implementation/`
@@ -201,8 +205,8 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 
 | Phase | Description | Status |
 |-------|-------------|--------|
-| **01** | Project Setup & Infrastructure | 🟡 In Progress |
-| **02** | Authentication & Authorization | ⚪ Pending |
+| **01** | Project Setup & Infrastructure | 🟢 Complete |
+| **02** | Authentication & Authorization | 🟡 In Progress |
 | **03** | Real-time Messaging Foundation | ⚪ Pending |
 | **04** | E2E Encryption | ⚪ Pending |
 | **05** | File Sharing | ⚪ Pending |
@@ -253,5 +257,46 @@ For questions or issues, contact the development team.
 
 ---
 
-**Status:** Phase 01 - Project Setup & Infrastructure
-**Next Steps:** Complete backend and frontend scaffolding, then proceed to Phase 02 (Authentication)
+**Status:** Phase 01 - COMPLETE | Phase 02 - In Progress
+**Last Updated:** December 14, 2025
+
+---
+
+## Phase 01 - What's Included
+
+### Backend (NestJS)
+- NestJS 10 application with Fastify adapter
+- Database connection with Drizzle ORM
+- PostgreSQL schema with core tables (users, conversations, messages, etc.)
+- Environment configuration management
+- Project structure ready for modular development
+
+### Frontend (React)
+- React 19 + TypeScript + Vite setup
+- Tailwind CSS configured with dark mode
+- Zustand auth store (placeholder)
+- TanStack Query setup for server state
+- Component structure ready for implementation
+
+### Infrastructure
+- Docker Compose with PostgreSQL, Redis, MinIO
+- Monorepo setup with pnpm workspaces
+- Shared TypeScript types package
+- Development scripts and commands
+- Git setup and basic CI/CD placeholder
+
+### Documentation
+- Codebase summary with structure overview
+- System architecture documentation
+- Code standards and guidelines
+- Design system and components
+- Database schema documentation
+
+### Next Phase (02 - Authentication)
+- User registration/login API endpoints
+- JWT token management (access + refresh)
+- Password hashing with Argon2id
+- Authentication guards and decorators
+- Frontend login/signup forms
+- Token storage and refresh logic
+- Rate limiting on auth endpoints

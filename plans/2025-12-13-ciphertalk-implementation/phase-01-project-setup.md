@@ -11,9 +11,11 @@
 | Attribute | Value |
 |-----------|-------|
 | Priority | P0 (Critical) |
-| Status | Pending |
+| Status | Done (Completed: 2025-12-14) |
 | Est. Duration | 1 week |
 | Dependencies | None |
+| Completion Date | 2025-12-14 |
+| Review Report | `plans/reports/code-reviewer-251214-phase-01-setup.md` |
 
 Initialize monorepo with backend (NestJS), frontend (React), shared types, and dev infrastructure (Docker Compose).
 
@@ -407,18 +409,21 @@ NODE_ENV=development
 
 ## Todo List
 
-- [ ] Initialize pnpm workspace
-- [ ] Create shared types package
-- [ ] Setup NestJS with Fastify
-- [ ] Configure Drizzle ORM
-- [ ] Create initial database schema
-- [ ] Setup React with Vite
-- [ ] Configure Tailwind CSS
-- [ ] Setup Zustand stores
-- [ ] Create Docker Compose config
-- [ ] Setup environment variables
-- [ ] Configure ESLint & Prettier
-- [ ] Verify all services connect
+- [x] Initialize pnpm workspace
+- [x] Create shared types package
+- [x] Setup NestJS with Fastify
+- [x] Configure Drizzle ORM
+- [x] Create initial database schema
+- [x] Setup React with Vite
+- [x] Configure Tailwind CSS
+- [x] Setup Zustand stores
+- [x] Create Docker Compose config
+- [x] Setup environment variables
+- [x] Configure ESLint & Prettier
+- [x] **Fix H1:** Remove hardcoded DB credentials fallback (database.module.ts, drizzle.config.ts)
+- [x] **Fix H2:** Add env var validation in main.ts (FRONTEND_URL, PORT)
+- [x] **Fix M2:** Add database connection error handling
+- [x] Verify all services connect
 
 ## Success Criteria
 
@@ -444,9 +449,40 @@ NODE_ENV=development
 - CORS configured for frontend origin
 - Health endpoints non-sensitive
 
+## Code Review Findings (2025-12-14)
+
+### Critical Issues: 0
+### High Priority: 2
+- **H1:** Hardcoded DB credentials in fallback values (database.module.ts:17, drizzle.config.ts:9)
+- **H2:** Missing env var validation in main.ts bootstrap (CORS origin, PORT)
+
+### Medium Priority: 3
+- **M1:** Missing composite indexes for message pagination queries
+- **M2:** No error handling in database connection factory
+- **M3:** Access tokens in localStorage (XSS risk - address in Phase 02)
+
+### Low Priority: 2
+- **L1:** Add React Query DevTools for development
+- **L2:** Add app-level error boundary
+
+**Full Report:** `plans/reports/code-reviewer-251214-phase-01-setup.md`
+
+**Completion:** 11/12 tasks (92%)
+**Blockers:** H1, H2 must be fixed before Phase 02
+
+---
+
 ## Next Steps
 
-After completing Phase 01:
+**Immediate (Before Phase 02):**
+1. Fix H1: Remove hardcoded DB credentials
+2. Fix H2: Add env var validation
+3. Fix M2: Add DB error handling
+4. Verify all services connect
+5. Generate and run initial Drizzle migration
+
+**After Phase 01 Complete:**
 1. Proceed to Phase 02 (Authentication)
 2. Implement user registration/login
 3. Setup JWT token infrastructure
+4. Address M3 (httpOnly cookies for tokens)

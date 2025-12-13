@@ -26,7 +26,7 @@
 
 | Phase | Name | Priority | Status | Est. Duration |
 |-------|------|----------|--------|---------------|
-| 01 | [Project Setup & Infrastructure](phase-01-project-setup.md) | P0 | Pending | 1 week |
+| 01 | [Project Setup & Infrastructure](phase-01-project-setup.md) | P0 | Done (2025-12-14) | 1 week |
 | 02 | [Authentication & Authorization](phase-02-authentication.md) | P0 | Pending | 1.5 weeks |
 | 03 | [Real-time Messaging Foundation](phase-03-messaging.md) | P0 | Pending | 2 weeks |
 | 04 | [E2E Encryption](phase-04-encryption.md) | P0 | Pending | 2 weeks |
