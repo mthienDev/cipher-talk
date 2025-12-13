@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node \"C:/Users/Admin/Desktop/code/CipherTalk/.claude/scripts/set-active-plan.cjs\":*)",
+      "Skill(research)",
+      "WebSearch",
+      "WebFetch(domain:signal.org)",
+      "Bash(node screenshot.js:*)",
+      "Bash(lsof:*)",
+      "Bash(xargs kill:*)",
+      "Bash(node navigate.js:*)",
+      "Bash(taskkill:*)",
+      "Skill(ai-multimodal)"
+    ]
+  }
+}
