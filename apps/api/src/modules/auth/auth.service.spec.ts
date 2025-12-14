@@ -91,14 +91,15 @@ describe('AuthService', () => {
   describe('register', () => {
     it('should register a new user successfully', async () => {
       // Arrange
-      (usersService.findByEmail as jest.Mock).mockResolvedValue(null);
-      (argon2.hash as jest.Mock).mockResolvedValue('hashed_password');
-      (usersService.create as jest.Mock).mockResolvedValue({
+      const createdUser = {
         ...mockUser,
         email: mockRegisterDto.email,
         username: mockRegisterDto.username,
         displayName: mockRegisterDto.displayName,
-      });
+      };
+      (usersService.findByEmail as jest.Mock).mockResolvedValue(null);
+      (argon2.hash as jest.Mock).mockResolvedValue('hashed_password');
+      (usersService.create as jest.Mock).mockResolvedValue(createdUser);
       (jwtService.signAsync as jest.Mock)
         .mockResolvedValueOnce('access_token')
         .mockResolvedValueOnce('refresh_token');
@@ -110,6 +111,14 @@ describe('AuthService', () => {
       expect(result).toEqual({
         accessToken: 'access_token',
         refreshToken: 'refresh_token',
+        user: {
+          id: createdUser.id,
+          email: createdUser.email,
+          username: createdUser.username,
+          displayName: createdUser.displayName,
+          createdAt: createdUser.createdAt,
+          updatedAt: createdUser.updatedAt,
+        },
       });
       expect(usersService.findByEmail).toHaveBeenCalledWith(mockRegisterDto.email);
       expect(argon2.hash).toHaveBeenCalledWith(
@@ -165,6 +174,14 @@ describe('AuthService', () => {
       expect(result).toEqual({
         accessToken: 'access_token',
         refreshToken: 'refresh_token',
+        user: {
+          id: mockUser.id,
+          email: mockUser.email,
+          username: mockUser.username,
+          displayName: mockUser.displayName,
+          createdAt: mockUser.createdAt,
+          updatedAt: mockUser.updatedAt,
+        },
       });
       expect(usersService.findByEmail).toHaveBeenCalledWith(mockLoginDto.email);
       expect(argon2.verify).toHaveBeenCalledWith(mockUser.passwordHash, mockLoginDto.password);
@@ -203,6 +220,7 @@ describe('AuthService', () => {
       };
 
       (jwtService.verifyAsync as jest.Mock).mockResolvedValue(payload);
+      (usersService.findById as jest.Mock).mockResolvedValue(mockUser);
       (redisMock.get as jest.Mock).mockResolvedValue(null); // Not blacklisted
       (redisMock.setex as jest.Mock).mockResolvedValue('OK');
       (jwtService.signAsync as jest.Mock)
@@ -216,11 +234,20 @@ describe('AuthService', () => {
       expect(result).toEqual({
         accessToken: 'new_access_token',
         refreshToken: 'new_refresh_token',
+        user: {
+          id: mockUser.id,
+          email: mockUser.email,
+          username: mockUser.username,
+          displayName: mockUser.displayName,
+          createdAt: mockUser.createdAt,
+          updatedAt: mockUser.updatedAt,
+        },
       });
       expect(jwtService.verifyAsync).toHaveBeenCalledWith(
         refreshToken,
         expect.objectContaining({ secret: 'test-secret-key-for-jwt' }),
       );
+      expect(usersService.findById).toHaveBeenCalledWith(mockUser.id);
       expect(redisMock.get).toHaveBeenCalledWith(`blacklist:${refreshToken}`);
       expect(redisMock.setex).toHaveBeenCalled();
     });
@@ -324,12 +351,20 @@ describe('AuthService', () => {
         .mockResolvedValueOnce('refresh_token');
 
       // Act
-      const result = await (authService as any).generateTokens(userId, email);
+      const result = await (authService as any).generateTokens(userId, email, mockUser);
 
       // Assert
       expect(result).toEqual({
         accessToken: 'access_token',
         refreshToken: 'refresh_token',
+        user: {
+          id: mockUser.id,
+          email: mockUser.email,
+          username: mockUser.username,
+          displayName: mockUser.displayName,
+          createdAt: mockUser.createdAt,
+          updatedAt: mockUser.updatedAt,
+        },
       });
       expect(jwtService.signAsync).toHaveBeenNthCalledWith(1, { sub: userId, email }, {
         secret: 'test-secret-key-for-jwt',

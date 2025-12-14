@@ -1,3 +1,4 @@
+import type { User } from '@ciphertalk/shared';
 export interface RegisterData {
     email: string;
     username: string;
@@ -11,6 +12,7 @@ export interface LoginData {
 export interface AuthResponse {
     accessToken: string;
     refreshToken: string;
+    user: User;
 }
 export declare const authApi: {
     register: (data: RegisterData) => Promise<AuthResponse>;

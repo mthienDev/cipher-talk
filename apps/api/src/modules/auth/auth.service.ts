@@ -5,6 +5,7 @@ import * as argon2 from 'argon2';
 import Redis from 'ioredis';
 import { UsersService } from '@/modules/users/users.service';
 import { RegisterDto, LoginDto, TokensDto } from '@/modules/auth/dto';
+import type { User } from '@ciphertalk/shared';
 
 @Injectable()
 export class AuthService {
@@ -46,8 +47,8 @@ export class AuthService {
       throw new ConflictException('Failed to create user');
     }
 
-    // Generate tokens
-    return this.generateTokens(user.id, user.email);
+    // Generate tokens with user data
+    return this.generateTokens(user.id, user.email, user);
   }
 
   async login(dto: LoginDto): Promise<TokensDto> {
@@ -61,7 +62,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    return this.generateTokens(user.id, user.email);
+    return this.generateTokens(user.id, user.email, user);
   }
 
   async refresh(refreshToken: string): Promise<TokensDto> {
@@ -74,11 +75,17 @@ export class AuthService {
       throw new UnauthorizedException('Token revoked');
     }
 
+    // Fetch current user data
+    const user = await this.usersService.findById(payload.sub);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
     // Blacklist old refresh token
     await this.blacklistToken(refreshToken, payload.exp);
 
-    // Generate new tokens
-    return this.generateTokens(payload.sub, payload.email);
+    // Generate new tokens with user data
+    return this.generateTokens(user.id, user.email, user);
   }
 
   async logout(accessToken: string, refreshToken: string): Promise<void> {
@@ -92,7 +99,11 @@ export class AuthService {
     ]);
   }
 
-  private async generateTokens(userId: string, email: string): Promise<TokensDto> {
+  private async generateTokens(
+    userId: string,
+    email: string,
+    dbUser: { passwordHash: string; [key: string]: any },
+  ): Promise<TokensDto> {
     const payload = { sub: userId, email };
 
     const jwtSecret = this.configService.get<string>('JWT_SECRET');
@@ -102,7 +113,17 @@ export class AuthService {
       this.jwtService.signAsync(payload, { secret: jwtSecret, expiresIn: '7d' }),
     ]);
 
-    return { accessToken, refreshToken };
+    // Safely remove passwordHash from user object before returning
+    const { passwordHash, ...userWithoutPassword } = dbUser;
+
+    // Cast to User type (without passwordHash)
+    const safeUser: User = userWithoutPassword as User;
+
+    return {
+      accessToken,
+      refreshToken,
+      user: safeUser,
+    };
   }
 
   private async blacklistToken(token: string, expiry: number): Promise<void> {

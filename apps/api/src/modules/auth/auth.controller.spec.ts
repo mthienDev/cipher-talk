@@ -7,9 +7,19 @@ describe('AuthController', () => {
   let authController: AuthController;
   let authService: AuthService;
 
+  const mockUser = {
+    id: '550e8400-e29b-41d4-a716-446655440000',
+    email: 'test@example.com',
+    username: 'testuser',
+    displayName: 'Test User',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
   const mockTokens = {
     accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
     refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+    user: mockUser,
   };
 
   const mockRegisterDto = {
