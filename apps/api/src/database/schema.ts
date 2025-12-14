@@ -83,12 +83,50 @@ export const refreshTokens = pgTable(
     userId: uuid('user_id')
       .references(() => users.id, { onDelete: 'cascade' })
       .notNull(),
-    token: text('token').unique().notNull(),
+    tokenHash: text('token_hash').notNull(),
     expiresAt: timestamp('expires_at').notNull(),
+    deviceInfo: text('device_info'),
+    ipAddress: varchar('ip_address', { length: 45 }),
     createdAt: timestamp('created_at').defaultNow().notNull(),
+    revokedAt: timestamp('revoked_at'),
   },
   (table) => [
     index('refresh_tokens_user_idx').on(table.userId),
-    index('refresh_tokens_token_idx').on(table.token),
+    index('refresh_tokens_token_hash_idx').on(table.tokenHash),
+  ],
+);
+
+export const userRoles = pgTable(
+  'user_roles',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .references(() => users.id, { onDelete: 'cascade' })
+      .notNull(),
+    role: varchar('role', { length: 20 }).notNull(), // 'admin' | 'moderator' | 'member'
+    grantedBy: uuid('granted_by').references(() => users.id),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('user_roles_user_idx').on(table.userId),
+    index('user_roles_role_idx').on(table.role),
+  ],
+);
+
+export const passwordResetTokens = pgTable(
+  'password_reset_tokens',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .references(() => users.id, { onDelete: 'cascade' })
+      .notNull(),
+    tokenHash: text('token_hash').notNull(),
+    expiresAt: timestamp('expires_at').notNull(),
+    usedAt: timestamp('used_at'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('password_reset_tokens_user_idx').on(table.userId),
+    index('password_reset_tokens_token_hash_idx').on(table.tokenHash),
   ],
 );

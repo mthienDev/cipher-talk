@@ -1,40 +1,56 @@
-import { useAuthStore } from '@/stores/auth-store';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { LoginForm } from './features/auth/components/login-form';
+import { RegisterForm } from './features/auth/components/register-form';
+import { ProtectedRoute } from './components/protected-route';
+import { Header } from './components/header';
+import { useAuthStore } from './stores/auth-store';
 
-function App() {
-  const { isAuthenticated, user } = useAuthStore();
+function HomePage() {
+  const { user } = useAuthStore();
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white">
-      <header className="border-b border-slate-700 p-4">
-        <h1 className="text-xl font-bold">CipherTalk</h1>
-      </header>
-
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <Header />
       <main className="p-8">
         <div className="mx-auto max-w-4xl">
-          <div className="rounded-lg bg-slate-800 p-6">
-            <h2 className="mb-4 text-2xl font-semibold">
-              Secure Enterprise Chat
+          <div className="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-sm">
+            <h2 className="mb-4 text-2xl font-semibold text-gray-900 dark:text-white">
+              Welcome to CipherTalk
             </h2>
-            <p className="text-slate-300">
+            <p className="text-gray-600 dark:text-gray-300">
               End-to-end encrypted messaging for enterprise teams.
             </p>
 
-            <div className="mt-6 rounded bg-slate-700 p-4">
-              <p className="text-sm text-slate-400">
-                Status:{' '}
-                {isAuthenticated ? (
-                  <span className="text-green-400">
-                    Authenticated as {user?.username}
-                  </span>
-                ) : (
-                  <span className="text-yellow-400">Not authenticated</span>
-                )}
+            <div className="mt-6 rounded bg-gray-100 dark:bg-gray-700 p-4">
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                Logged in as: <span className="font-medium">{user?.displayName || user?.username}</span>
+              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                Email: {user?.email}
               </p>
             </div>
           </div>
         </div>
       </main>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <Routes>
+      <Route path="/login" element={<LoginForm />} />
+      <Route path="/register" element={<RegisterForm />} />
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <HomePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
 

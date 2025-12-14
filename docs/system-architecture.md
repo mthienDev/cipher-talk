@@ -1,7 +1,7 @@
 # CipherTalk System Architecture
 
-**Version:** 1.0.0
-**Phase:** 01 - Project Setup & Infrastructure
+**Version:** 2.0.0
+**Phase:** 02 - Authentication & Authorization
 **Last Updated:** December 14, 2025
 
 ---
@@ -160,17 +160,18 @@ CipherTalk uses a **3-tier architecture** optimized for enterprise-scale secure 
 
 **Architecture Pattern:** Modular NestJS with dependency injection
 
-**Current Modules:**
-- `AppModule` - Root module, configuration
-- `DatabaseModule` - Database client provision
-- ConfigModule - Environment configuration
+**Current Modules (Phase 01-02):**
+- `AppModule` - Root module, configuration, imports all feature modules
+- `DatabaseModule` - Database client provision with Drizzle ORM
+- `ConfigModule` - Environment configuration
+- `AuthModule` - ✅ JWT authentication, token management, guards, strategies
+- `UsersModule` - ✅ User CRUD operations
+- `ThrottlerModule` - ✅ Rate limiting for auth endpoints
 
-**Planned Modules (Phase 02+):**
-- `AuthModule` - JWT, token management, guards
-- `UsersModule` - User CRUD operations
+**Planned Modules (Phase 03+):**
 - `ConversationsModule` - Conversation management
 - `MessagesModule` - Message CRUD and broadcasting
-- `WebSocketModule` - Real-time event handling
+- `WebSocketModule` - Real-time event handling with Socket.IO
 
 ---
 
@@ -184,10 +185,13 @@ Database: ciphertalk
 ├── conversations (DMs and groups)
 ├── conversationMembers (Group membership)
 ├── messages (Encrypted message content)
-└── refreshTokens (JWT refresh token tracking)
+├── refreshTokens (JWT refresh token tracking with device info)
+├── userRoles (RBAC: admin, moderator, member)
+└── passwordResetTokens (Password recovery tokens)
 ```
 
 **Redis (Session & Cache Layer)**
+- JWT token blacklist (logout, refresh invalidation)
 - Active user sessions
 - Temporary data
 - Message queue (future)
@@ -202,25 +206,34 @@ Database: ciphertalk
 
 ## Data Flow
 
-### Authentication Flow (Phase 02)
+### Authentication Flow (Phase 02 - IMPLEMENTED)
 ```
 User Input (Browser)
     ↓
-React Component → Zustand Store
+React Component → LoginForm/RegisterForm
     ↓
-HTTP POST /auth/login
+TanStack Query Mutation (useLogin/useRegister)
+    ↓
+HTTP POST /auth/login or /auth/register
     ↓
 NestJS AuthModule
-    ├─ Validate credentials
-    ├─ Hash comparison (Argon2id)
-    ├─ Generate JWT tokens
-    └─ Store refresh token in PostgreSQL
+    ├─ Validate DTO with class-validator
+    ├─ Hash comparison with Argon2id (64MB, 3 iterations, parallelism 4)
+    ├─ Generate JWT tokens (15m access, 7d refresh)
+    └─ Store refresh token hash in PostgreSQL
     ↓
-Response: { accessToken, refreshToken }
+Response: { accessToken, refreshToken, user }
     ↓
-Zustand Store saves tokens
+Zustand Store saves user + accessToken
+localStorage saves refreshToken
     ↓
-Set Authorization header for future requests
+Axios interceptor adds Authorization: Bearer {accessToken}
+    ↓
+On 401 error → Auto token refresh via /auth/refresh
+    ↓
+Old refresh token blacklisted in Redis
+    ↓
+New tokens issued and stored
 ```
 
 ### Message Flow (Phase 03)
@@ -363,11 +376,16 @@ MinIO Cluster (Storage)
 ## Security Architecture
 
 ### Authentication & Authorization
-**Phase 02 Implementation:**
-- JWT tokens (access + refresh)
-- Argon2id password hashing
-- Secure token storage (HttpOnly cookies)
-- CORS protection
+**Phase 02 - IMPLEMENTED:**
+- ✅ JWT tokens (15m access + 7d refresh)
+- ✅ Argon2id password hashing (type: argon2id, memoryCost: 64MB, timeCost: 3, parallelism: 4)
+- ✅ Refresh token storage in PostgreSQL with device info and IP tracking
+- ✅ Token blacklisting in Redis for logout and refresh invalidation
+- ✅ RBAC with guards (admin, moderator, member roles)
+- ✅ Rate limiting (3/min register, 5/min login)
+- ✅ CORS protection (restricted to frontend origin)
+- ✅ JWT guards with Passport strategy
+- ⏳ Secure token storage (HttpOnly cookies) - future enhancement
 
 ### Encryption
 **Phase 04 Implementation:**
@@ -397,11 +415,13 @@ MinIO Cluster (Storage)
 
 ## Future Enhancements
 
-### Phase 02 (Authentication)
-- User registration/login
-- JWT token management
-- Password reset flow
-- Account settings
+### Phase 02 (Authentication) - ✅ COMPLETED
+- ✅ User registration/login with validation
+- ✅ JWT token management (access + refresh)
+- ✅ RBAC with guards and decorators
+- ✅ Rate limiting on auth endpoints
+- ⏳ Password reset flow (planned)
+- ⏳ Account settings (planned)
 
 ### Phase 03 (Real-time Messaging)
 - Message CRUD operations

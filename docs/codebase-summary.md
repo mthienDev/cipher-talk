@@ -1,8 +1,8 @@
 # CipherTalk Codebase Summary
 
 **Last Updated:** December 14, 2025
-**Phase:** 01 - Project Setup & Infrastructure
-**Status:** In Progress
+**Phase:** 02 - Authentication & Authorization
+**Status:** Completed
 
 ---
 
@@ -51,13 +51,29 @@ cipher-talk/
 ```
 apps/api/src/
 ├── main.ts              # Application bootstrap
-├── app.module.ts        # Root module with ConfigModule and DatabaseModule
+├── app.module.ts        # Root module with ConfigModule, DatabaseModule, AuthModule, UsersModule
 ├── app.controller.ts    # Health check and test endpoints
 ├── app.service.ts       # App-level business logic
 ├── database/
 │   ├── schema.ts        # Drizzle ORM table definitions
 │   ├── index.ts         # Database client exports
 │   └── database.module.ts  # Database NestJS module
+├── modules/
+│   ├── auth/
+│   │   ├── auth.module.ts           # Auth module configuration
+│   │   ├── auth.controller.ts       # Auth REST endpoints (register, login, refresh, logout)
+│   │   ├── auth.service.ts          # Auth business logic (JWT, Argon2id)
+│   │   ├── dto/                     # Request/response DTOs
+│   │   ├── guards/
+│   │   │   ├── jwt-auth.guard.ts    # JWT authentication guard
+│   │   │   └── roles.guard.ts       # RBAC authorization guard
+│   │   ├── decorators/
+│   │   │   └── roles.decorator.ts   # Role decorator for RBAC
+│   │   └── strategies/
+│   │       └── jwt.strategy.ts      # Passport JWT strategy
+│   └── users/
+│       ├── users.module.ts          # Users module configuration
+│       └── users.service.ts         # User CRUD operations
 └── drizzle/             # Database migrations (auto-generated)
 ```
 
@@ -122,11 +138,39 @@ messages {
 ```typescript
 refreshTokens {
   id: UUID (PK)
-  userId: UUID (FK → users)
-  token: TEXT (UNIQUE)
+  userId: UUID (FK → users, cascade)
+  tokenHash: TEXT
   expiresAt: TIMESTAMP
+  deviceInfo: TEXT (nullable)
+  ipAddress: VARCHAR(45) (nullable)
   createdAt: TIMESTAMP
-  // Indexes: userId, token
+  revokedAt: TIMESTAMP (nullable)
+  // Indexes: userId, tokenHash
+}
+```
+
+#### User Roles Table (RBAC)
+```typescript
+userRoles {
+  id: UUID (PK)
+  userId: UUID (FK → users, cascade)
+  role: VARCHAR(20) - 'admin' | 'moderator' | 'member'
+  grantedBy: UUID (FK → users, nullable)
+  createdAt: TIMESTAMP
+  // Indexes: userId, role
+}
+```
+
+#### Password Reset Tokens Table
+```typescript
+passwordResetTokens {
+  id: UUID (PK)
+  userId: UUID (FK → users, cascade)
+  tokenHash: TEXT
+  expiresAt: TIMESTAMP
+  usedAt: TIMESTAMP (nullable)
+  createdAt: TIMESTAMP
+  // Indexes: userId, tokenHash
 }
 ```
 
@@ -146,9 +190,12 @@ pnpm --filter api db:studio
 ```
 
 ### Module System
-- **AppModule:** Root module, imports ConfigModule and DatabaseModule
+- **AppModule:** Root module, imports ConfigModule, DatabaseModule, AuthModule, UsersModule, ThrottlerModule
 - **ConfigModule:** Global environment configuration
 - **DatabaseModule:** Provides database client and repository patterns
+- **AuthModule:** JWT authentication, token management, guards, and strategies
+- **UsersModule:** User CRUD operations and service layer
+- **ThrottlerModule:** Rate limiting for auth endpoints (3/min register, 5/min login)
 
 ### Environment Variables (Backend)
 ```env
@@ -163,9 +210,10 @@ DATABASE_URL=postgresql://user:password@localhost:5432/ciphertalk
 # Redis
 REDIS_URL=redis://localhost:6379
 
-# Authentication (to be added in Phase 02)
+# Authentication (Phase 02 - IMPLEMENTED)
 JWT_SECRET=<32-char-min-random-string>
-JWT_REFRESH_EXPIRY=7d
+JWT_EXPIRES_IN=15m
+JWT_REFRESH_EXPIRES_IN=7d
 
 # Encryption (to be added in Phase 04)
 ENCRYPTION_KEY=<32-char-random-string>
@@ -190,17 +238,27 @@ S3_BUCKET=ciphertalk
 ### Directory Structure
 ```
 apps/web/src/
-├── main.tsx         # React entry point
-├── App.tsx          # Root component (displays auth status)
+├── main.tsx         # React entry point with BrowserRouter, QueryClientProvider
+├── App.tsx          # Root component with Routes (/login, /register, /)
 ├── index.css        # Global styles with Tailwind imports
 ├── vite-env.d.ts    # Vite environment types
-├── components/      # Reusable UI components (to be added)
-├── features/        # Feature modules (to be added)
-├── hooks/           # Custom React hooks (to be added)
+├── components/
+│   ├── header.tsx           # App header with user info and logout
+│   └── protected-route.tsx  # Route guard for authenticated routes
+├── features/
+│   └── auth/
+│       ├── components/
+│       │   ├── login-form.tsx     # Login form with validation
+│       │   └── register-form.tsx  # Registration form with password confirmation
+│       ├── hooks/
+│       │   └── use-auth.ts        # TanStack Query mutations (useLogin, useRegister, useLogout)
+│       └── api/
+│           └── auth-api.ts        # Auth API client methods
 ├── stores/
-│   ├── auth-store.ts    # Zustand auth store
+│   ├── auth-store.ts    # Zustand auth store with persist middleware
 │   └── index.ts         # Store exports
 └── lib/
+    ├── api-client.ts    # Axios instance with JWT interceptors
     └── utils.ts         # Utility functions
 ```
 
@@ -240,9 +298,12 @@ pnpm --filter web tsc --noEmit
 ```
 
 ### Current Implementation
-- App.tsx displays conditional UI based on authentication state
+- Full authentication system with login/register forms
+- Protected routes with automatic redirect to /login
+- JWT token refresh with axios interceptors
+- Header component with user info and logout functionality
+- React Router v7 for client-side routing
 - Tailwind dark mode color scheme (slate-900 base)
-- Ready for component library integration
 
 ---
 
@@ -371,9 +432,9 @@ pnpm test:e2e       # E2E tests (Cypress/Playwright)
 
 ---
 
-## Phase 01 Completion Status
+## Phase 02 Completion Status
 
-### Completed
+### Phase 01 - Project Setup (COMPLETED)
 - Monorepo setup with pnpm workspaces
 - NestJS backend scaffolding with Fastify adapter
 - React frontend with Vite and TypeScript
@@ -381,16 +442,27 @@ pnpm test:e2e       # E2E tests (Cypress/Playwright)
 - Docker Compose configuration (PostgreSQL, Redis, MinIO)
 - Shared TypeScript types package
 - Design Guidelines and branding
-- Basic app structure (App.tsx with auth state placeholder)
 
-### Next Phase (Phase 02 - Authentication)
-- User registration/login endpoints
-- JWT token generation and validation
-- Password hashing with Argon2id
-- Refresh token management
-- Auth guards and decorators
-- Frontend login/signup forms
-- Token storage and refresh logic
+### Phase 02 - Authentication & Authorization (COMPLETED)
+- ✅ User registration/login endpoints with validation
+- ✅ JWT token generation (15m access, 7d refresh)
+- ✅ Password hashing with Argon2id (OWASP 2025 recommended parameters)
+- ✅ Refresh token management with blacklisting
+- ✅ JWT auth guards and RBAC guards
+- ✅ Frontend login/register forms with error handling
+- ✅ Token storage with axios interceptors for auto-refresh
+- ✅ Rate limiting (3/min register, 5/min login)
+- ✅ Protected routes with navigation guards
+- ✅ Header component with logout functionality
+- ✅ Comprehensive test coverage (44/44 tests passing, 85%+ coverage)
+
+### Next Phase (Phase 03 - Real-time Messaging)
+- WebSocket connection management with Socket.IO
+- Message CRUD operations
+- Conversation management (direct messages & group chats)
+- Typing indicators and read receipts
+- Real-time message broadcasting
+- Message history pagination
 
 ---
 
@@ -408,12 +480,17 @@ pnpm test:e2e       # E2E tests (Cypress/Playwright)
 - MinIO console available at http://localhost:9001
 - CORS enabled for frontend URL in ConfigModule
 
-### Code Standards (Phase 01)
+### Code Standards (Phase 01-02)
 - NestJS modules for feature organization
 - Fastify for high-performance HTTP
 - Drizzle ORM for type-safe database access
 - Zustand for lightweight client-side state
+- TanStack Query for server state management
 - Tailwind CSS for utility-first styling
+- @ alias for all import paths (backend & frontend)
+- JWT authentication with Argon2id password hashing
+- RBAC with guards and decorators
+- Rate limiting on critical endpoints
 
 ---
 
