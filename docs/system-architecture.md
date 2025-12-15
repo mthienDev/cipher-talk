@@ -88,7 +88,7 @@ CipherTalk uses a **3-tier architecture** optimized for enterprise-scale secure 
          │  │  └── Users Module                         │    │
          │  └──────────────────────────────────────────┘    │
          │  ┌──────────────────────────────────────────┐    │
-         │  │  Database Module (Drizzle ORM)           │    │
+         │  │  Database Module (Prisma ORM)           │    │
          │  │  ├── Connection Pool                     │    │
          │  │  ├── Query Builder                       │    │
          │  │  └── Migration Runner                    │    │
@@ -162,7 +162,7 @@ CipherTalk uses a **3-tier architecture** optimized for enterprise-scale secure 
 
 **Current Modules (Phase 01-02):**
 - `AppModule` - Root module, configuration, imports all feature modules
-- `DatabaseModule` - Database client provision with Drizzle ORM
+- `DatabaseModule` - Database client provision with Prisma ORM
 - `ConfigModule` - Environment configuration
 - `AuthModule` - ✅ JWT authentication, token management, guards, strategies
 - `UsersModule` - ✅ User CRUD operations
@@ -176,7 +176,7 @@ CipherTalk uses a **3-tier architecture** optimized for enterprise-scale secure 
 ---
 
 ### 3. Data Tier
-**Technologies:** PostgreSQL 16 + Drizzle ORM + Redis 7 + MinIO
+**Technologies:** PostgreSQL 16 + Prisma ORM + Redis 7 + MinIO
 
 **PostgreSQL (Primary Data Store)**
 ```
@@ -298,7 +298,7 @@ Recipient decrypts with shared secret
 | **Framework** | NestJS 10 | Application structure |
 | **HTTP Server** | Fastify 5 | High-performance HTTP |
 | **Language** | TypeScript | Type safety |
-| **ORM** | Drizzle ORM | Type-safe queries |
+| **ORM** | Prisma ORM | Type-safe queries |
 | **Database** | PostgreSQL 16 | Primary data store |
 | **Cache** | Redis 7 | Session & cache layer |
 | **File Storage** | MinIO | S3-compatible storage |
@@ -400,7 +400,7 @@ MinIO Cluster (Storage)
 - Rate limiting on auth endpoints
 
 ### Database Security
-- Prepared statements (Drizzle ORM)
+- Prepared statements (Prisma ORM)
 - SQL injection protection
 - Foreign key constraints
 - UUID primary keys (no sequential IDs)

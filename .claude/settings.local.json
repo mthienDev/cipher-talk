@@ -11,7 +11,10 @@
       "Bash(node navigate.js:*)",
       "Bash(taskkill:*)",
       "Skill(ai-multimodal)",
-      "Bash(pnpm add:*)"
+      "Bash(pnpm add:*)",
+      "Bash(pnpm prisma generate:*)",
+      "Bash(docker restart:*)",
+      "Bash(DATABASE_URL=\"postgresql://ciphertalk:password@127.0.0.1:5432/ciphertalk\" npx prisma db push:*)"
     ]
   }
 }

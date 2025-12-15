@@ -25,10 +25,10 @@ cd apps
 pnpm create nest api --strict
 cd api
 pnpm add @nestjs/platform-fastify fastify
-pnpm add drizzle-orm postgres
+pnpm add @prisma/client
 pnpm add @nestjs/config @nestjs/websockets @nestjs/platform-socket.io
 pnpm add socket.io redis ioredis
-pnpm add -D drizzle-kit @types/node
+pnpm add -D prisma @types/node
 
 # 3. Create frontend app (React + Vite)
 cd ../
@@ -49,7 +49,7 @@ pnpm docker:up
 # 6. Copy environment variables
 cp .env.example .env
 
-# 7. Run database migrations (after creating Drizzle config)
+# 7. Run database migrations (after creating Prisma schema)
 pnpm db:migrate
 
 # 8. Start development servers
@@ -68,9 +68,9 @@ ciphertalk/
 │   │   │   ├── modules/        # Feature modules
 │   │   │   ├── common/         # Shared utilities
 │   │   │   ├── config/         # Configuration
-│   │   │   ├── database/       # Drizzle ORM setup
+│   │   │   ├── database/       # Prisma ORM setup
 │   │   │   └── main.ts
-│   │   └── drizzle/            # Migrations
+│   │   └── prisma/             # Prisma schema & migrations
 │   └── web/                    # React frontend (Port 5173)
 │       ├── src/
 │       │   ├── components/     # UI components
@@ -101,7 +101,7 @@ ciphertalk/
 ### Backend
 - **NestJS 10** + Fastify adapter
 - **PostgreSQL 16** - Database
-- **Drizzle ORM** - Type-safe database access
+- **Prisma ORM** - Type-safe database access
 - **Redis 7** - Caching & sessions
 - **Socket.IO** - WebSocket server
 - **MinIO** - S3-compatible object storage
@@ -266,7 +266,7 @@ For questions or issues, contact the development team.
 
 ### Backend (NestJS)
 - NestJS 10 application with Fastify adapter
-- Database connection with Drizzle ORM
+- Database connection with Prisma ORM
 - PostgreSQL schema with core tables (users, conversations, messages, etc.)
 - Environment configuration management
 - Project structure ready for modular development

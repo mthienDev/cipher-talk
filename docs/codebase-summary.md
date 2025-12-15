@@ -11,9 +11,9 @@
 CipherTalk is a secure enterprise chat platform built with a modern monorepo architecture. The codebase uses NestJS (backend), React + TypeScript (frontend), and shared TypeScript types to ensure type safety across the entire application.
 
 ### Tech Stack Summary
-- **Backend:** NestJS 10 + Fastify adapter, PostgreSQL 16, Drizzle ORM
+- **Backend:** NestJS 10 + Fastify adapter, PostgreSQL 16, Prisma ORM
 - **Frontend:** React 19 + Vite, TypeScript, Zustand, TanStack Query, Tailwind CSS
-- **Database:** PostgreSQL with Drizzle ORM migrations
+- **Database:** PostgreSQL with Prisma ORM migrations
 - **Cache/Sessions:** Redis 7
 - **File Storage:** MinIO (S3-compatible)
 - **Real-time:** Socket.IO with WebSocket support
@@ -55,9 +55,8 @@ apps/api/src/
 ├── app.controller.ts    # Health check and test endpoints
 ├── app.service.ts       # App-level business logic
 ├── database/
-│   ├── schema.ts        # Drizzle ORM table definitions
 │   ├── index.ts         # Database client exports
-│   └── database.module.ts  # Database NestJS module
+│   └── database.module.ts  # Database NestJS module (PrismaService)
 ├── modules/
 │   ├── auth/
 │   │   ├── auth.module.ts           # Auth module configuration
@@ -74,10 +73,13 @@ apps/api/src/
 │   └── users/
 │       ├── users.module.ts          # Users module configuration
 │       └── users.service.ts         # User CRUD operations
-└── drizzle/             # Database migrations (auto-generated)
+
+apps/api/prisma/        # Prisma schema & migrations
+├── schema.prisma       # Database schema definition
+└── migrations/         # Migration files (auto-generated)
 ```
 
-### Database Schema (Drizzle ORM)
+### Database Schema (Prisma ORM)
 
 #### Users Table
 ```typescript
@@ -420,7 +422,7 @@ pnpm test:e2e       # E2E tests (Cypress/Playwright)
 - **tsconfig.json:** TypeScript configuration
 - **nest-cli.json:** NestJS CLI configuration
 - **jest.config.js:** Jest testing configuration
-- **drizzle.config.ts:** Drizzle ORM configuration
+- **prisma/schema.prisma:** Prisma schema definition
 - **package.json:** Backend dependencies and scripts
 
 ### Frontend (apps/web)
@@ -438,7 +440,7 @@ pnpm test:e2e       # E2E tests (Cypress/Playwright)
 - Monorepo setup with pnpm workspaces
 - NestJS backend scaffolding with Fastify adapter
 - React frontend with Vite and TypeScript
-- Database schema with Drizzle ORM (5 core tables)
+- Database schema with Prisma ORM (5 core tables)
 - Docker Compose configuration (PostgreSQL, Redis, MinIO)
 - Shared TypeScript types package
 - Design Guidelines and branding
@@ -483,7 +485,7 @@ pnpm test:e2e       # E2E tests (Cypress/Playwright)
 ### Code Standards (Phase 01-02)
 - NestJS modules for feature organization
 - Fastify for high-performance HTTP
-- Drizzle ORM for type-safe database access
+- Prisma ORM for type-safe database access
 - Zustand for lightweight client-side state
 - TanStack Query for server state management
 - Tailwind CSS for utility-first styling
@@ -506,7 +508,7 @@ pnpm test:e2e       # E2E tests (Cypress/Playwright)
 ## References
 
 - [NestJS Documentation](https://docs.nestjs.com/)
-- [Drizzle ORM Documentation](https://orm.drizzle.team/)
+- [Prisma ORM Documentation](https://www.prisma.io/docs)
 - [React 19 Documentation](https://react.dev/)
 - [Vite Documentation](https://vitejs.dev/)
 - [Tailwind CSS Documentation](https://tailwindcss.com/)

@@ -1,27 +1,27 @@
-import { Module, Global } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
-import * as schema from './schema';
+import { Module, Global, OnModuleInit, OnModuleDestroy, Injectable } from '@nestjs/common';
+import { PrismaClient } from '@prisma/client';
 
-export const DATABASE_CONNECTION = 'DATABASE_CONNECTION';
+export const PRISMA_SERVICE = 'PRISMA_SERVICE';
+
+@Injectable()
+export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+  async onModuleInit() {
+    await this.$connect();
+  }
+
+  async onModuleDestroy() {
+    await this.$disconnect();
+  }
+}
 
 @Global()
 @Module({
   providers: [
     {
-      provide: DATABASE_CONNECTION,
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
-        const connectionString = configService.get<string>(
-          'DATABASE_URL',
-          'postgresql://ciphertalk:ciphertalk_dev@localhost:5432/ciphertalk',
-        );
-        const client = postgres(connectionString);
-        return drizzle(client, { schema });
-      },
+      provide: PRISMA_SERVICE,
+      useClass: PrismaService,
     },
   ],
-  exports: [DATABASE_CONNECTION],
+  exports: [PRISMA_SERVICE],
 })
 export class DatabaseModule {}

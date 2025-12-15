@@ -1,0 +1,134 @@
+// Prisma schema for CipherTalk
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique @db.VarChar(255)
+  username     String   @unique @db.VarChar(50)
+  displayName  String   @map("display_name") @db.VarChar(100)
+  passwordHash String   @map("password_hash") @db.Text
+  avatarUrl    String?  @map("avatar_url") @db.Text
+  status       String   @default("offline") @db.VarChar(20)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  // Relations
+  sentMessages         Message[]              @relation("SentMessages")
+  conversationMembers  ConversationMember[]
+  refreshTokens        RefreshToken[]
+  userRoles            UserRole[]
+  passwordResetTokens  PasswordResetToken[]
+  grantedRoles         UserRole[]             @relation("GrantedBy")
+
+  @@index([email])
+  @@index([username])
+  @@map("users")
+}
+
+model Conversation {
+  id        String   @id @default(uuid()) @db.Uuid
+  type      String   @db.VarChar(20) // 'direct' | 'group'
+  name      String?  @db.VarChar(100)
+  avatarUrl String?  @map("avatar_url") @db.Text
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  // Relations
+  members  ConversationMember[]
+  messages Message[]
+
+  @@map("conversations")
+}
+
+model ConversationMember {
+  id             String       @id @default(uuid()) @db.Uuid
+  conversationId String       @map("conversation_id") @db.Uuid
+  userId         String       @map("user_id") @db.Uuid
+  role           String       @default("member") @db.VarChar(20)
+  joinedAt       DateTime     @default(now()) @map("joined_at") @db.Timestamp(6)
+
+  // Relations
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@index([userId])
+  @@map("conversation_members")
+}
+
+model Message {
+  id             String       @id @default(uuid()) @db.Uuid
+  conversationId String       @map("conversation_id") @db.Uuid
+  senderId       String?      @map("sender_id") @db.Uuid
+  content        String       @db.Text // Encrypted content
+  type           String       @default("text") @db.VarChar(20)
+  metadata       String?      @db.Text // JSON string
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt      DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  // Relations
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User?        @relation("SentMessages", fields: [senderId], references: [id], onDelete: SetNull)
+
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([createdAt])
+  @@map("messages")
+}
+
+model RefreshToken {
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  tokenHash  String    @map("token_hash") @db.Text
+  expiresAt  DateTime  @map("expires_at") @db.Timestamp(6)
+  deviceInfo String?   @map("device_info") @db.Text
+  ipAddress  String?   @map("ip_address") @db.VarChar(45)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
+  revokedAt  DateTime? @map("revoked_at") @db.Timestamp(6)
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@map("refresh_tokens")
+}
+
+model UserRole {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  role      String   @db.VarChar(20) // 'admin' | 'moderator' | 'member'
+  grantedBy String?  @map("granted_by") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+
+  // Relations
+  user    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  granter User? @relation("GrantedBy", fields: [grantedBy], references: [id])
+
+  @@index([userId])
+  @@index([role])
+  @@map("user_roles")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  tokenHash String    @map("token_hash") @db.Text
+  expiresAt DateTime  @map("expires_at") @db.Timestamp(6)
+  usedAt    DateTime? @map("used_at") @db.Timestamp(6)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@map("password_reset_tokens")
+}

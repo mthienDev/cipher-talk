@@ -526,63 +526,61 @@ export const ConditionalRender: FC<LoadingProps> = ({
 
 ## Database Standards
 
-### Drizzle ORM Table Definition
-```typescript
-// ✅ GOOD
-import { pgTable, uuid, varchar, timestamp, text, index } from 'drizzle-orm/pg-core';
+### Prisma Schema Definition
+```prisma
+// ✅ GOOD - Prisma schema (prisma/schema.prisma)
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique @db.VarChar(255)
+  username     String   @unique @db.VarChar(50)
+  displayName  String   @map("display_name") @db.VarChar(100)
+  passwordHash String   @map("password_hash") @db.Text
+  avatarUrl    String?  @map("avatar_url") @db.Text
+  status       String   @default("offline") @db.VarChar(20)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at")
 
-export const users = pgTable(
-  'users',
-  {
-    id: uuid('id').primaryKey().defaultRandom(),
-    email: varchar('email', { length: 255 }).notNull().unique(),
-    username: varchar('username', { length: 50 }).notNull().unique(),
-    passwordHash: text('password_hash').notNull(),
-    status: varchar('status', { length: 20 }).default('offline').notNull(),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
-    updatedAt: timestamp('updated_at').defaultNow().notNull(),
-  },
-  (table) => [
-    index('users_email_idx').on(table.email),
-    index('users_username_idx').on(table.username),
-  ],
-);
+  @@index([email])
+  @@index([username])
+  @@map("users")
+}
 ```
 
 ### Query Patterns
 ```typescript
-// ✅ GOOD - Prepared statement (safe from SQL injection)
-const user = await db
-  .select()
-  .from(users)
-  .where(eq(users.id, userId))
-  .limit(1);
+// ✅ GOOD - Find unique (type-safe)
+const user = await prisma.user.findUnique({
+  where: { id: userId },
+});
 
-// ✅ GOOD - With joins
-const conversations = await db
-  .select()
-  .from(conversations)
-  .leftJoin(
-    conversationMembers,
-    eq(conversations.id, conversationMembers.conversationId),
-  )
-  .where(eq(conversationMembers.userId, userId));
+// ✅ GOOD - With relations
+const conversations = await prisma.conversation.findMany({
+  where: {
+    members: {
+      some: { userId },
+    },
+  },
+  include: {
+    members: true,
+    messages: { take: 1, orderBy: { createdAt: 'desc' } },
+  },
+});
 
 // ✅ GOOD - With transactions
-const result = await db.transaction(async (tx) => {
-  const user = await tx.insert(users).values(newUser).returning();
-  await tx.insert(refreshTokens).values({ userId: user[0].id, token });
-  return user[0];
+const result = await prisma.$transaction(async (tx) => {
+  const user = await tx.user.create({ data: newUser });
+  await tx.refreshToken.create({ data: { userId: user.id, tokenHash } });
+  return user;
 });
 ```
 
 ### Migration Naming
 ```
-// Format: YYYYMMDDHHMMSS_descriptive_name
-drizzle/
-├── 20250101000000_initial_schema.sql
-├── 20250105000000_add_message_encryption.sql
-└── 20250110000000_add_indexes_for_performance.sql
+// Prisma migrations (auto-generated)
+prisma/migrations/
+├── 20250101000000_initial_schema/
+├── 20250105000000_add_message_encryption/
+└── 20250110000000_add_indexes_for_performance/
 ```
 
 ---
@@ -1039,7 +1037,7 @@ Each module should have a README with:
 - Never log sensitive data (passwords, tokens)
 - Use environment variables for secrets
 - Validate and sanitize all inputs
-- Use parameterized queries (Drizzle ORM)
+- Use parameterized queries (Prisma ORM)
 - Implement rate limiting on auth endpoints
 - CORS should be restrictive
 - Use HTTPS in production

@@ -1,9 +1,5 @@
 import { Injectable, NotFoundException, Inject } from '@nestjs/common';
-import { eq } from 'drizzle-orm';
-import { DATABASE_CONNECTION } from '@/database';
-import { users } from '@/database/schema';
-import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
-import type * as schema from '@/database/schema';
+import { PRISMA_SERVICE, PrismaService } from '@/database';
 
 export interface CreateUserData {
   email: string;
@@ -15,45 +11,36 @@ export interface CreateUserData {
 @Injectable()
 export class UsersService {
   constructor(
-    @Inject(DATABASE_CONNECTION)
-    private readonly db: PostgresJsDatabase<typeof schema>,
+    @Inject(PRISMA_SERVICE)
+    private readonly prisma: PrismaService,
   ) {}
 
   async findByEmail(email: string) {
-    const result = await this.db
-      .select()
-      .from(users)
-      .where(eq(users.email, email))
-      .limit(1);
-
-    return result[0] || null;
+    return this.prisma.user.findUnique({
+      where: { email },
+    });
   }
 
   async findById(id: string) {
-    const result = await this.db
-      .select()
-      .from(users)
-      .where(eq(users.id, id))
-      .limit(1);
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+    });
 
-    if (!result[0]) {
+    if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
-    return result[0];
+    return user;
   }
 
   async create(data: CreateUserData) {
-    const result = await this.db
-      .insert(users)
-      .values({
+    return this.prisma.user.create({
+      data: {
         email: data.email,
         username: data.username,
         displayName: data.displayName,
         passwordHash: data.passwordHash,
-      })
-      .returning();
-
-    return result[0];
+      },
+    });
   }
 }

@@ -44,7 +44,7 @@ Development guidelines and best practices including:
 - TypeScript standards and patterns
 - NestJS backend standards (50+ examples)
 - React frontend standards (40+ examples)
-- Database/Drizzle patterns
+- Database/Prisma patterns
 - File and folder organization
 - Naming conventions (3 tables)
 - Error handling strategies
@@ -149,7 +149,7 @@ Comprehensive design system including:
 - Error boundaries
 - TypeScript patterns
 
-### Database (Drizzle)
+### Database (Prisma)
 - Table definitions
 - Safe queries
 - Joins and transactions
@@ -175,7 +175,7 @@ ciphertalk (monorepo)
 │   │   │   ├── app.module.ts
 │   │   │   ├── database/      Database layer
 │   │   │   └── modules/       Feature modules (Phase 02+)
-│   │   └── drizzle/           Migrations
+│   │   └── prisma/           Migrations
 │   │
 │   └── web/                    React frontend
 │       ├── src/
@@ -217,7 +217,7 @@ ciphertalk (monorepo)
 ### Backend
 - NestJS 10 + Fastify
 - PostgreSQL 16
-- Drizzle ORM
+- Prisma ORM
 - Redis 7
 - MinIO (file storage)
 - Socket.IO (real-time)
@@ -318,7 +318,7 @@ pnpm --filter api db:studio       # Visual editor
 - React frontend with Vite
 - PostgreSQL database schema
 - Docker services (PostgreSQL, Redis, MinIO)
-- Drizzle ORM configuration
+- Prisma ORM configuration
 - Environment configuration
 - Design system and guidelines
 - Code standards and guidelines
@@ -407,7 +407,7 @@ README.md (Overview)
 - [NestJS Documentation](https://docs.nestjs.com/)
 - [React Documentation](https://react.dev/)
 - [PostgreSQL 16 Docs](https://www.postgresql.org/docs/16/)
-- [Drizzle ORM Docs](https://orm.drizzle.team/)
+- [Prisma ORM Docs](https://orm.prisma.team/)
 - [Tailwind CSS Docs](https://tailwindcss.com/)
 
 ### Guides & References

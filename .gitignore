@@ -79,7 +79,8 @@ prompt.md
 # CipherTalk specific
 *.db
 *.sqlite
-drizzle/
+# Prisma migrations are tracked in git, ignore generated client
+node_modules/.prisma/
 .minio/
 docker-compose.override.yml
 .browser-session.json
