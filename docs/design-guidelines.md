@@ -45,42 +45,43 @@
 #### Foundation Colors
 ```css
 /* Background layers */
---bg-primary: #0f0f0f;       /* Main app background */
---bg-secondary: #1a1a1a;     /* Sidebar, panels */
---bg-tertiary: #242424;      /* Cards, message bubbles */
---bg-elevated: #2a2a2a;      /* Modals, dropdowns */
+--bg-primary: #080808;       /* Main app background - Deep charcoal */
+--bg-secondary: #0f0f0f;     /* Sidebar, panels */
+--bg-tertiary: #1a1a1a;      /* Cards, message bubbles */
+--bg-elevated: #3E4F46;      /* Modals, dropdowns - Dark sage */
 
 /* Surface colors */
---surface-default: #1a1a1a;
---surface-hover: #242424;
---surface-active: #2a2a2a;
+--surface-default: #0f0f0f;
+--surface-hover: #1a1a1a;
+--surface-active: #3E4F46;   /* Active state - Dark sage */
 ```
 
 #### Brand Colors
 ```css
-/* Primary - Professional Blue */
---primary-50: #eff6ff;
---primary-100: #dbeafe;
---primary-200: #bfdbfe;
---primary-300: #93c5fd;
---primary-400: #60a5fa;
---primary-500: #3b82f6;       /* Main brand color */
---primary-600: #2563eb;
---primary-700: #1d4ed8;
---primary-800: #1e40af;
---primary-900: #1e3a8a;
+/* Primary - Forest Green */
+--primary-50: #f0f7f0;
+--primary-100: #d9ead9;
+--primary-200: #b3d5b3;
+--primary-300: #8cc08c;
+--primary-400: #66aa66;
+--primary-500: #3A6A3A;       /* Main brand color - Forest green */
+--primary-600: #2e5530;
+--primary-700: #234026;
+--primary-800: #172b1a;
+--primary-900: #0c150d;
 
-/* Accent - Security Green */
---accent-500: #10b981;        /* E2E encryption indicator */
---accent-600: #059669;
---accent-700: #047857;
+/* Accent - Sage Gray */
+--accent-400: #79827E;        /* Medium gray for subtle emphasis */
+--accent-500: #3E4F46;        /* Dark sage for E2E encryption indicator */
+--accent-600: #2d3a33;
+--accent-700: #1d2620;
 ```
 
 #### Semantic Colors
 ```css
-/* Success */
---success: #10b981;
---success-bg: #064e3b;
+/* Success - Uses primary green */
+--success: #3A6A3A;
+--success-bg: #0c150d;
 
 /* Warning */
 --warning: #f59e0b;
@@ -90,26 +91,26 @@
 --error: #ef4444;
 --error-bg: #7f1d1d;
 
-/* Info */
---info: #3b82f6;
---info-bg: #1e3a8a;
+/* Info - Uses primary green */
+--info: #3A6A3A;
+--info-bg: #0c150d;
 ```
 
 #### Text Colors
 ```css
 /* Text hierarchy */
---text-primary: #f5f5f5;      /* High emphasis (15.8:1 contrast) */
---text-secondary: #a3a3a3;    /* Medium emphasis (7:1 contrast) */
---text-tertiary: #737373;     /* Low emphasis (4.5:1 contrast) */
---text-disabled: #525252;     /* Disabled state */
---text-inverse: #0f0f0f;      /* On primary/accent colors */
+--text-primary: #D5D5D7;      /* High emphasis - Light gray */
+--text-secondary: #79827E;    /* Medium emphasis - Medium gray */
+--text-tertiary: #3E4F46;     /* Low emphasis - Dark sage */
+--text-disabled: #2d3a33;     /* Disabled state */
+--text-inverse: #080808;      /* On primary/accent colors */
 ```
 
 #### Border & Divider
 ```css
---border-default: #2a2a2a;
---border-subtle: #1f1f1f;
---border-emphasis: #404040;
+--border-default: #1a1a1a;
+--border-subtle: #0f0f0f;
+--border-emphasis: #3E4F46;   /* Uses dark sage for emphasis */
 ```
 
 ### Light Mode Palette (Optional)
@@ -992,7 +993,119 @@ npx shadcn-chat@latest init  # Chat-specific components
 
 ---
 
+## Theme Management (NEW - v1.3.0)
+
+### Theme Store Architecture
+
+**File:** `apps/web/src/stores/theme-store.ts`
+
+Theme management implemented with Zustand + persist middleware:
+
+```typescript
+interface ThemeStore {
+  theme: ThemeMode;           // 'light' | 'dark'
+  setTheme: (theme: ThemeMode) => void;  // Set theme explicitly
+  toggleTheme: () => void;    // Toggle between light/dark
+  initTheme: () => void;      // Initialize from localStorage or system preference
+}
+```
+
+**Features:**
+- Persistent storage via localStorage key `'ciphertalk-theme'`
+- System preference fallback (prefers-color-scheme media query)
+- FOUC (Flash of Unstyled Content) prevention script in index.html
+- Synchronized theme application to document root class
+
+**Theme Application:**
+```typescript
+// Applies 'dark' class to <html> element
+// CSS automatically handles light/dark colors via Tailwind darkMode: 'class'
+if (theme === 'dark') {
+  document.documentElement.classList.add('dark');
+} else {
+  document.documentElement.classList.remove('dark');
+}
+```
+
+### Theme Toggle Component
+
+**File:** `apps/web/src/components/theme-toggle.tsx`
+
+UI button for theme switching with icon feedback:
+
+```typescript
+export function ThemeToggle() {
+  // Uses useThemeStore hook
+  // Displays Sun icon (dark mode) or Moon icon (light mode)
+  // WCAG compliant: 44x44px minimum, proper focus ring
+}
+```
+
+**Accessibility:**
+- Min size: 44x44px (touch target)
+- Focus ring: 2px primary-500 with offset
+- ARIA labels and title attribute for screen readers
+- Icon transitions smooth theme switching
+
+### FOUC Prevention
+
+**Script Location:** `apps/web/index.html` (before React mount)
+
+Executes immediately on page load:
+1. Reads stored theme from localStorage
+2. Checks system preference if no stored value
+3. Applies dark class to document.documentElement
+4. Prevents white flash on dark-mode preference
+
+Critical: Script must run before Tailwind applies styles.
+
+### Light Mode Palette Addition
+
+Dark mode remains default. Light mode colors via Tailwind darkMode: 'class':
+
+**Light Mode Colors:**
+```css
+Light background: #ffffff
+Light secondary: #f5f5f5
+Light text primary: #0f0f0f
+Light text secondary: #525252
+Light borders: #e5e5e5
+```
+
+Inherited from design guidelines + Tailwind defaults.
+
+---
+
 ## Changelog
+
+**v1.3.0 (2025-12-15):**
+- **Theme Toggle Feature:** Full light/dark mode implementation
+- New useThemeStore (Zustand + persist) for theme management
+- ThemeToggle component integrated in Header
+- FOUC prevention script in index.html
+- Support for system preference (prefers-color-scheme)
+- localStorage persistence with fallback to system setting
+- Light mode palette added (complements dark mode)
+- Header component now includes theme toggle button
+- App.tsx initializes theme on mount via useEffect
+
+**v1.2.0 (2025-12-15):**
+- **Major Color Palette Update:** Transitioned from blue to forest green theme
+- Primary color: #3A6A3A (Forest Green) - replaces #3b82f6 (Professional Blue)
+- Updated background layers: #080808 (primary), #0f0f0f (secondary), #1a1a1a (tertiary)
+- New accent colors: #3E4F46 (Dark Sage), #79827E (Medium Gray)
+- Updated text hierarchy: #D5D5D7 (primary), #79827E (secondary), #3E4F46 (tertiary)
+- All components updated with new color palette (LoginPage, buttons, inputs, badges)
+- Maintained WCAG 2.1 AA contrast compliance across all color combinations
+- Updated Tailwind CSS v4 configuration with new theme colors
+
+**v1.1.0 (2025-12-15):**
+- Added LoginPage component implementation
+- Documented authentication page patterns
+- Added gradient background effects
+- Implemented password visibility toggle
+- Added loading states for async actions
+- Enhanced security badge patterns
 
 **v1.0.0 (2025-12-13):**
 - Initial design system

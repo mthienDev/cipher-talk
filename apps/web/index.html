@@ -4,6 +4,23 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- FOUC Prevention Script - Must run before any CSS/JS -->
+    <script>
+      (function() {
+        try {
+          const stored = localStorage.getItem('ciphertalk-theme');
+          const theme = stored ? JSON.parse(stored).state.theme : null;
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (theme === 'dark' || (!theme && prefersDark)) {
+            document.documentElement.classList.add('dark');
+          }
+        } catch (e) {
+          // Fail silently, default to light mode
+        }
+      })();
+    </script>
+
     <title>CipherTalk - Secure Enterprise Chat</title>
   </head>
   <body>

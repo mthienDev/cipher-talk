@@ -2,39 +2,111 @@
 
 /* Custom theme configuration using CSS variables (Tailwind v4) */
 @theme {
-  --color-primary-50: #eff6ff;
-  --color-primary-100: #dbeafe;
-  --color-primary-200: #bfdbfe;
-  --color-primary-300: #93c5fd;
-  --color-primary-400: #60a5fa;
-  --color-primary-500: #3b82f6;
-  --color-primary-600: #2563eb;
-  --color-primary-700: #1d4ed8;
-  --color-primary-800: #1e40af;
-  --color-primary-900: #1e3a8a;
-  --color-primary-950: #172554;
+  /* Primary - Forest Green */
+  --color-primary-50: #f0f7f0;
+  --color-primary-100: #d9ead9;
+  --color-primary-200: #b3d5b3;
+  --color-primary-300: #8cc08c;
+  --color-primary-400: #66aa66;
+  --color-primary-500: #3A6A3A;
+  --color-primary-600: #2e5530;
+  --color-primary-700: #234026;
+  --color-primary-800: #172b1a;
+  --color-primary-900: #0c150d;
+  --color-primary-950: #050a07;
+
+  /* Accent - Sage Gray */
+  --color-accent-400: #79827E;
+  --color-accent-500: #3E4F46;
+  --color-accent-600: #2d3a33;
+  --color-accent-700: #1d2620;
+
+  /* Background layers */
+  --color-bg-primary: #080808;
+  --color-bg-secondary: #0f0f0f;
+  --color-bg-tertiary: #1a1a1a;
+  --color-bg-elevated: #3E4F46;
+
+  /* Surface colors */
+  --color-surface-default: #0f0f0f;
+  --color-surface-hover: #1a1a1a;
+  --color-surface-active: #3E4F46;
+
+  /* Text colors */
+  --color-text-primary: #D5D5D7;
+  --color-text-secondary: #79827E;
+  --color-text-tertiary: #3E4F46;
+  --color-text-disabled: #2d3a33;
+  --color-text-inverse: #080808;
+
+  /* Border colors */
+  --color-border-default: #1a1a1a;
+  --color-border-subtle: #0f0f0f;
+  --color-border-emphasis: #3E4F46;
+
+  /* Semantic colors */
+  --color-success: #3A6A3A;
+  --color-success-bg: #0c150d;
+  --color-warning: #f59e0b;
+  --color-warning-bg: #78350f;
+  --color-error: #ef4444;
+  --color-error-bg: #7f1d1d;
+  --color-info: #3A6A3A;
+  --color-info-bg: #0c150d;
+
+  /* Light mode palette */
+  --color-bg-primary-light: #ffffff;
+  --color-bg-secondary-light: #f5f5f5;
+  --color-bg-tertiary-light: #e5e5e5;
+  --color-bg-elevated-light: #ffffff;
+
+  --color-surface-default-light: #ffffff;
+  --color-surface-hover-light: #f5f5f5;
+  --color-surface-active-light: #e5e5e5;
+
+  --color-text-primary-light: #0f0f0f;
+  --color-text-secondary-light: #525252;
+  --color-text-tertiary-light: #737373;
+  --color-text-disabled-light: #a3a3a3;
+  --color-text-inverse-light: #ffffff;
+
+  --color-border-default-light: #e5e5e5;
+  --color-border-subtle-light: #f5f5f5;
+  --color-border-emphasis-light: #d4d4d4;
 }
 
 /* Base styles */
 body {
-  @apply bg-slate-900 text-slate-100;
+  @apply bg-white dark:bg-bg-primary text-gray-900 dark:text-text-primary transition-colors;
 }
 
 /* Component classes */
 @layer components {
   .btn {
-    @apply inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-3 text-base font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 min-h-[44px];
   }
 
   .btn-primary {
-    @apply bg-primary-600 text-white hover:bg-primary-700 focus-visible:ring-primary-500;
+    @apply bg-primary-500 text-white hover:bg-primary-600 active:scale-[0.98] focus-visible:ring-primary-500;
   }
 
   .btn-secondary {
-    @apply bg-slate-700 text-slate-100 hover:bg-slate-600 focus-visible:ring-slate-500;
+    @apply bg-transparent border border-gray-300 dark:border-border-default text-gray-900 dark:text-text-primary hover:bg-gray-100 dark:hover:bg-surface-hover focus-visible:ring-primary-500;
+  }
+
+  .btn-ghost {
+    @apply bg-transparent text-gray-600 dark:text-text-secondary hover:bg-gray-100 dark:hover:bg-surface-hover hover:text-gray-900 dark:hover:text-text-primary;
   }
 
   .input {
-    @apply flex h-10 w-full rounded-md border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply w-full rounded-lg border border-gray-300 dark:border-border-default bg-white dark:bg-bg-tertiary px-4 py-3 text-base text-gray-900 dark:text-text-primary placeholder:text-gray-500 dark:placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:cursor-not-allowed disabled:opacity-50 transition-all min-h-[44px];
+  }
+
+  .card {
+    @apply rounded-xl border border-gray-200 dark:border-border-default bg-white dark:bg-bg-secondary p-8;
+  }
+
+  .card-elevated {
+    @apply rounded-xl border border-gray-200 dark:border-border-default bg-white dark:bg-bg-secondary p-8 shadow-lg;
   }
 }

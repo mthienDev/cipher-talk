@@ -1,9 +1,11 @@
+import { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { LoginForm } from './features/auth/components/login-form';
+import { LoginPage } from './features/auth/components/LoginPage';
 import { RegisterForm } from './features/auth/components/register-form';
 import { ProtectedRoute } from './components/protected-route';
 import { Header } from './components/header';
 import { useAuthStore } from './stores/auth-store';
+import { useThemeStore } from './stores/theme-store';
 
 function HomePage() {
   const { user } = useAuthStore();
@@ -37,9 +39,15 @@ function HomePage() {
 }
 
 function App() {
+  const { initTheme } = useThemeStore();
+
+  useEffect(() => {
+    initTheme();
+  }, [initTheme]);
+
   return (
     <Routes>
-      <Route path="/login" element={<LoginForm />} />
+      <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterForm />} />
       <Route
         path="/"

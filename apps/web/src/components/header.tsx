@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../stores/auth-store';
 import { useLogout } from '../features/auth/hooks/use-auth';
+import { ThemeToggle } from './theme-toggle';
 
 export function Header() {
   const navigate = useNavigate();
@@ -30,6 +31,7 @@ export function Header() {
             <span className="text-sm text-gray-700 dark:text-gray-300">
               {user?.displayName || user?.username}
             </span>
+            <ThemeToggle />
             <button
               onClick={handleLogout}
               disabled={isPending}

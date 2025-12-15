@@ -420,7 +420,7 @@ function Counter() {
 
 ### Zustand Store Pattern
 ```typescript
-// ✅ GOOD
+// ✅ GOOD - Without persistence
 import { create } from 'zustand';
 
 interface AuthState {
@@ -462,7 +462,37 @@ export const useAuthStore = create<AuthState>((set) => ({
     });
   },
 }));
+
+// ✅ GOOD - With persistence (for theme, preferences, etc.)
+import { persist } from 'zustand/middleware';
+
+interface ThemeState {
+  theme: 'light' | 'dark';
+  setTheme: (theme: 'light' | 'dark') => void;
+  toggleTheme: () => void;
+}
+
+export const useThemeStore = create<ThemeState>()(
+  persist(
+    (set, get) => ({
+      theme: 'dark',
+      setTheme: (theme) => set({ theme }),
+      toggleTheme: () => {
+        const newTheme = get().theme === 'light' ? 'dark' : 'light';
+        set({ theme: newTheme });
+      },
+    }),
+    { name: 'ciphertalk-theme' } // localStorage key
+  )
+);
 ```
+
+**When to use persist middleware:**
+- User preferences (theme, language, layout)
+- UI state that should survive refresh (sidebar open/closed)
+- Non-sensitive data only (never persist auth tokens in localStorage)
+
+**Storage key naming:** `{appname}-{storename}` (e.g., 'ciphertalk-theme')
 
 ### TanStack Query Pattern
 ```typescript

@@ -242,35 +242,39 @@ S3_BUCKET=ciphertalk
 apps/web/src/
 ├── main.tsx         # React entry point with BrowserRouter, QueryClientProvider
 ├── App.tsx          # Root component with Routes (/login, /register, /)
-├── index.css        # Global styles with Tailwind imports
+│                    # Initializes theme on mount via useEffect
+├── index.css        # Global styles with Tailwind imports + theme CSS variables
 ├── vite-env.d.ts    # Vite environment types
 ├── components/
-│   ├── header.tsx           # App header with user info and logout
+│   ├── header.tsx           # App header with user info, logout, and theme toggle
+│   ├── theme-toggle.tsx     # Theme toggle button (Sun/Moon icons) - NEW v1.3.0
 │   └── protected-route.tsx  # Route guard for authenticated routes
 ├── features/
 │   └── auth/
 │       ├── components/
 │       │   ├── login-form.tsx     # Login form with validation
+│       │   ├── LoginPage.tsx      # Full login page with branding (forest green theme)
 │       │   └── register-form.tsx  # Registration form with password confirmation
 │       ├── hooks/
 │       │   └── use-auth.ts        # TanStack Query mutations (useLogin, useRegister, useLogout)
 │       └── api/
 │           └── auth-api.ts        # Auth API client methods
 ├── stores/
-│   ├── auth-store.ts    # Zustand auth store with persist middleware
-│   └── index.ts         # Store exports
+│   ├── auth-store.ts        # Zustand auth store with persist middleware
+│   ├── theme-store.ts       # Zustand theme store with persist middleware - NEW v1.3.0
+│   └── index.ts             # Store exports
 └── lib/
-    ├── api-client.ts    # Axios instance with JWT interceptors
-    └── utils.ts         # Utility functions
+    ├── api-client.ts        # Axios instance with JWT interceptors
+    └── utils.ts             # Utility functions
 ```
 
 ### State Management
-- **Store:** Zustand
+- **Store:** Zustand with persist middleware
 - **Server State:** TanStack Query (@tanstack/react-query)
-- **Current Store:** `auth-store.ts` for authentication state
+- **Current Stores:**
 
+**Auth Store:** `auth-store.ts` for authentication state
 ```typescript
-// auth-store interface (Zustand)
 {
   isAuthenticated: boolean
   user: { username: string } | null
@@ -278,6 +282,22 @@ apps/web/src/
   logout: () => void
 }
 ```
+
+**Theme Store:** `theme-store.ts` for dark/light mode management (NEW - v1.3.0)
+```typescript
+{
+  theme: 'light' | 'dark'
+  setTheme: (theme: ThemeMode) => void
+  toggleTheme: () => void
+  initTheme: () => void   // Initializes from localStorage or system preference
+}
+```
+
+**Theme Persistence:**
+- localStorage key: `'ciphertalk-theme'`
+- Zustand persist middleware stores/retrieves theme setting
+- FOUC prevention via inline script in index.html
+- System preference fallback using prefers-color-scheme media query
 
 ### Styling
 - **Tailwind CSS:** Configured with dark mode (`darkMode: 'class'`)
@@ -457,6 +477,17 @@ pnpm test:e2e       # E2E tests (Cypress/Playwright)
 - ✅ Protected routes with navigation guards
 - ✅ Header component with logout functionality
 - ✅ Comprehensive test coverage (44/44 tests passing, 85%+ coverage)
+
+### Phase 02+ - Theme Management (NEW)
+- ✅ Dark/light mode toggle feature
+- ✅ useThemeStore (Zustand + persist middleware)
+- ✅ ThemeToggle component with Sun/Moon icons
+- ✅ FOUC prevention script in index.html
+- ✅ System preference detection (prefers-color-scheme)
+- ✅ localStorage persistence with fallback logic
+- ✅ Header integration with theme toggle button
+- ✅ Light mode color palette support
+- ✅ Forest green theme consistency across light/dark modes
 
 ### Next Phase (Phase 03 - Real-time Messaging)
 - WebSocket connection management with Socket.IO
