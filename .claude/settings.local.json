@@ -14,7 +14,15 @@
       "Bash(pnpm add:*)",
       "Bash(pnpm prisma generate:*)",
       "Bash(docker restart:*)",
-      "Bash(DATABASE_URL=\"postgresql://ciphertalk:password@127.0.0.1:5432/ciphertalk\" npx prisma db push:*)"
+      "Bash(DATABASE_URL=\"postgresql://ciphertalk:password@127.0.0.1:5432/ciphertalk\" npx prisma db push:*)",
+      "Bash(powershell -Command \"Get-ChildItem -Path ''apps/web'' -Recurse | Where-Object { $_Name -match ''tailwind|vite|index'' } | Select-Object -ExpandProperty FullName\")",
+      "Bash(gemini:*)",
+      "Bash(pnpm tsc:*)",
+      "Bash(npx tsc:*)",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm --filter api test)",
+      "Bash(cat:*)",
+      "Bash(pnpm lint:*)"
     ]
   }
 }
